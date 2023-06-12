@@ -24,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late double screenHeight, screenWidth, cardWidth;
   bool _isChecked = false;
   bool _isPasswordVisible = false; // Added variable to track password visibility
-  final Color _boxShadowColor = Colors.deepPurple.withOpacity(0.4);
+  final Color _boxShadowColor = const Color(0xFF000000).withOpacity(0.4);
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text(
           "Login",
-          style: TextStyle(color: Colors.blueAccent),
+          style: TextStyle(color: Color(0xFF448AFF)),
         ),
         backgroundColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.deepPurple),
@@ -171,9 +171,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 40,
                                   elevation: 10,
                                   onPressed: onLogin,
-                                  color: Theme.of(context).primaryColor,
+                                  color: Theme.of(context).colorScheme.primaryContainer,
                                   textColor:
-                                      Theme.of(context).colorScheme.onError,
+                                      Colors.black,
                                   child: const Text(
                                 'Login', 
                                 style: TextStyle(fontSize: 17),

@@ -5,7 +5,7 @@ import 'package:barterlt/myconfig.dart';
 import 'package:barterlt/views/screens/mainscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'models/user.dart';
+import 'package:barterlt/models/user.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

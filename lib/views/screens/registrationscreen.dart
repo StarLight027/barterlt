@@ -23,7 +23,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _isPasswordVisible = false;
   bool _isReenterPasswordVisible = false;
 
-  final Color _shadowColor = Colors.deepPurple.withOpacity(0.4);
+  final Color _shadowColor = const Color(0xFF000000).withOpacity(0.4);
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +33,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("User Registration",
-            style: TextStyle(color: Colors.blueAccent)),
+            style: TextStyle(color: Color(0xFF005AC2))),
         backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.deepPurple),
+        iconTheme: const IconThemeData(color: Colors.black),
         foregroundColor: Theme.of(context).colorScheme.secondary,
         elevation: 0,
       ),
@@ -188,7 +188,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       decoration: TextDecoration.underline,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.blueAccent,
+                                      color: Color(0xFF005AC2),
                                     ),
                                   ),
                                 ),
@@ -201,8 +201,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               height: 40,
                               elevation: 10,
                               onPressed: onRegisterDialog,
-                              color: Theme.of(context).primaryColor,
-                              textColor: Theme.of(context).colorScheme.onError,
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              textColor: Colors.black,
                               child: const Text(
                                 'Register', 
                                 style: TextStyle(fontSize: 17),
