@@ -14,7 +14,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => SplashScreenState();
 }
 
-class SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin{
+class SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
 
@@ -42,16 +43,14 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
     //         MaterialPageRoute(builder: (content) =>  MainScreen())));
   }
 
-    @override
+  @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -62,12 +61,10 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
             children: [
               Image.asset(
                 'assets/images/splash.jpg',
-              width: 500,
-              height: 500,
+                width: 500,
+                height: 500,
               ),
-
               const SizedBox(height: 16),
-              
               const SizedBox(height: 8),
               const Text(
                 'Loading...',
@@ -78,7 +75,6 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
         ),
       ),
     );
-        
   }
 
   checkAndLogin() async {
@@ -89,8 +85,7 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
     late User user;
     if (ischeck) {
       try {
-        http.post(
-            Uri.parse("${MyConfig().SERVER}/barterlt/php/login_user.php"),
+        http.post(Uri.parse("${MyConfig().SERVER}/barterit/php/login_user.php"),
             body: {"email": email, "password": password}).then((response) {
           if (response.statusCode == 200) {
             var jsondata = jsonDecode(response.body);
@@ -117,12 +112,8 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
                     MaterialPageRoute(
                         builder: (content) => MainScreen(user: user))));
           }
-        }).timeout(const Duration(seconds: 5), onTimeout: () {
-          // Time has run out, do what you wanted to do.
-        });
-      } on TimeoutException catch (_) {
-        print("Time out");
-      }
+        }).timeout(const Duration(seconds: 5), onTimeout: () {});
+      } on TimeoutException catch (_) {}
     } else {
       user = User(
           id: "na",

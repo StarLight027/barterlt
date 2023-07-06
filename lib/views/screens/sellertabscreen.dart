@@ -27,11 +27,14 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
   late List<Widget> tabchildren;
   String maintitle = "Seller";
   List<Item> itemList = <Item>[];
+  int numofpage = 1, curpage = 1;
+  int numberofresult = 0;
+  var color;
 
   @override
   void initState() {
     super.initState();
-    loadsellerItems();
+    loadsellerItems(1);
     print("Seller");
   }
 
@@ -54,9 +57,7 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
       appBar: AppBar(
         title: Text(maintitle),
       ),
-      body: 
-      
-      RefreshIndicator(
+      body: RefreshIndicator(
         onRefresh: _refreshData,
         child: itemList.isEmpty
             ? const Center(
@@ -71,7 +72,7 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
                     width: 300,
                     alignment: Alignment.center,
                     child: Text(
-                      "${itemList.length} Items Found",
+                      "$numberofresult Items Found",
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ),
@@ -111,99 +112,115 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
                 ),
                 Expanded(
                   child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: axiscount,
-                        childAspectRatio:
-                            3 / 4, // Adjust the aspect ratio as needed
-                      ),
-                      itemCount: itemList.length,
-                      itemBuilder: (context, index) {
-      
-                        return Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: InkWell(
-                            onLongPress: () {
-                              onDeleteDialog(index);
-                            },
-                            onTap: () async {
-                              Item singleitem =
-                                  Item.fromJson(itemList[index].toJson());
-                              await Navigator.push(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: axiscount,
+                      childAspectRatio:
+                          3 / 4, // Adjust the aspect ratio as needed
+                    ),
+                    itemCount: itemList.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: InkWell(
+                          onLongPress: () {
+                            onDeleteDialog(index);
+                          },
+                          onTap: () async {
+                            Item singleitem =
+                                Item.fromJson(itemList[index].toJson());
+                            await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (content) => EditItemScreen(
-                                    user: widget.user,
-                                    useritem: singleitem,
-                                  ),
-                                ),
-                              );
-                              loadsellerItems();
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                              child: ClipRRect(
+                                    builder: (content) => EditItemScreen(
+                                          user: widget.user,
+                                          useritem: singleitem,
+                                        )));
+                            loadsellerItems(1);
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(12.0),
                                     topRight: Radius.circular(12.0),
                                   ),
                                   child: CachedNetworkImage(
-                                    width: screenWidth,
-                                    height: 150,
+                                    width: double.infinity,
                                     fit: BoxFit.cover,
                                     imageUrl:
                                         "${MyConfig().SERVER}/barterlt/assets/items/1/${itemList[index].itemId}.png",
-                                        
-      
-                                      
                                     placeholder: (context, url) =>
                                         const LinearProgressIndicator(),
                                     errorWidget: (context, url, error) =>
                                         const Icon(Icons.error),
                                   ),
                                 ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      itemList[index].itemName.toString(),
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "RM ${double.parse(itemList[index].itemPrice.toString()).toStringAsFixed(2)}",
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "${itemList[index].itemQty} available",
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ],
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        itemList[index].itemName.toString(),
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        "RM ${double.parse(itemList[index].itemPrice.toString()).toStringAsFixed(2)}",
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        "${itemList[index].itemQty} available",
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
-            ],
                 ),
+                SizedBox(
+                  height: 50,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: numofpage,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      //build the list for textbutton with scroll
+                      if ((curpage - 1) == index) {
+                        //set current page number active
+                        color = Colors.blue;
+                      } else {
+                        color = Colors.black;
+                      }
+                      return TextButton(
+                          onPressed: () {
+                            curpage = index + 1;
+                            loadsellerItems(index + 1);
+                          },
+                          child: Text(
+                            (index + 1).toString(),
+                            style: TextStyle(color: color, fontSize: 18),
+                          ));
+                    },
+                  ),
+                ),
+              ]),
       ),
-            
-            
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
             if (widget.user.id != "na") {
@@ -213,7 +230,7 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
                       builder: (content) => NewItemScreen(
                             user: widget.user,
                           )));
-              loadsellerItems();
+              loadsellerItems(1);
             } else {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content: Text("Please login/register an account")));
@@ -221,15 +238,12 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
           },
           child: const Text(
             "+",
-            style: TextStyle(
-              fontSize: 32,
-              color: Colors.black,
-            ),
+            style: TextStyle(fontSize: 32),
           )),
     );
   }
 
-  void loadsellerItems() {
+  void loadsellerItems(int pg) {
     if (widget.user.id == "na") {
       setState(() {
         // titlecenter = "Unregistered User";
@@ -238,13 +252,21 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
     }
 
     http.post(Uri.parse("${MyConfig().SERVER}/barterlt/php/load_items.php"),
-        body: {"userid": widget.user.id}).then((response) {
+        body: {
+          "userid": widget.user.id,
+          "pageno": pg.toString()
+        }).then((response) {
       //print(response.body);
       log(response.body);
       itemList.clear();
       if (response.statusCode == 200) {
         var jsondata = jsonDecode(response.body);
+
         if (jsondata['status'] == "success") {
+          numofpage = int.parse(jsondata['numofpage']); //get number of pages
+          numberofresult = int.parse(jsondata['numberofresult']);
+          print(numberofresult);
+
           var extractdata = jsondata['data'];
           extractdata['items'].forEach((v) {
             itemList.add(Item.fromJson(v));
@@ -306,7 +328,7 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
         if (jsondata['status'] == "success") {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Delete Success")));
-          loadsellerItems();
+          loadsellerItems(1);
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Failed")));
@@ -316,11 +338,10 @@ class _SellerTabScreenState extends State<SellerTabScreen> {
   }
 
   Future<void> _refreshData() async {
-
     await Future.delayed(const Duration(seconds: 3));
 
     setState(() {
-      loadsellerItems();
+      loadsellerItems(1);
     });
   }
 }
