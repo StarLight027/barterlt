@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 06, 2023 at 03:26 PM
+-- Generation Time: Jul 21, 2023 at 01:50 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -72,18 +72,19 @@ CREATE TABLE `tbl_users` (
   `user_phone` varchar(12) NOT NULL,
   `user_password` varchar(40) NOT NULL,
   `user_otp` varchar(5) NOT NULL,
-  `user_datereg` datetime(6) NOT NULL DEFAULT current_timestamp(6)
+  `user_datereg` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `user_credit` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tbl_users`
 --
 
-INSERT INTO `tbl_users` (`user_id`, `user_email`, `user_name`, `user_phone`, `user_password`, `user_otp`, `user_datereg`) VALUES
-(1, 'syida2702@gmail.com', 'Nur Syidah', '0184002415', 'f865b53623b121fd34ee5426c792e5c33af8c227', '51303', '2023-05-20 02:37:12.737476'),
-(2, 'ali@gmail.com', 'Muhammad Ali', '0194883241', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '13818', '2023-05-21 16:03:33.153761'),
-(3, 'aisyah@gmail.com', 'Nur Aisyah', '01309954545', 'a622012aa4ebae001fa6c01f400a1b2d699698b1', '27572', '2023-05-21 17:03:45.204884'),
-(6, 'shahul@gmail.com', 'Shahul Mohamad', '0175466604', '68000620e71baab2b53f3c147e807e48e0780210', '84815', '2023-07-05 14:24:57.044660');
+INSERT INTO `tbl_users` (`user_id`, `user_email`, `user_name`, `user_phone`, `user_password`, `user_otp`, `user_datereg`, `user_credit`) VALUES
+(1, 'syida2702@gmail.com', 'Nur Mursyidah', '0184002416', '7b902e6ff1db9f560443f2048974fd7d386975b0', '51303', '2023-05-20 02:37:12.737476', 70),
+(2, 'ali@gmail.com', 'Muhammad Ali', '0194883241', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '13818', '2023-05-21 16:03:33.153761', 0),
+(3, 'aisyah@gmail.com', 'Nur Aisyah', '01309954545', 'a622012aa4ebae001fa6c01f400a1b2d699698b1', '27572', '2023-05-21 17:03:45.204884', 0),
+(6, 'shahul@gmail.com', 'Shahul Mohamad', '0175466604', '68000620e71baab2b53f3c147e807e48e0780210', '84815', '2023-07-05 14:24:57.044660', 0);
 
 --
 -- Indexes for dumped tables
