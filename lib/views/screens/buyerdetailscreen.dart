@@ -1,20 +1,32 @@
-import 'dart:convert';
+// ignore_for_file: deprecated_member_use
 
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:barterlt/views/screens/billscreen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:barterlt/models/item.dart';
 import 'package:barterlt/models/user.dart';
 import 'package:barterlt/myconfig.dart';
 import 'package:http/http.dart' as http;
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/cupertino.dart';
 
 class BuyerDetailsScreen extends StatefulWidget {
   final Item useritem;
   final User user;
+  final User seller;
   const BuyerDetailsScreen(
-      {super.key, required this.useritem, required this.user});
+      {super.key,
+      required this.useritem,
+      required this.user,
+      required this.seller});
 
   @override
   State<BuyerDetailsScreen> createState() => _BuyerDetailsScreenState();
@@ -190,9 +202,54 @@ class _BuyerDetailsScreenState extends State<BuyerDetailsScreen> {
                           ),
                         )
                       ]),
+                      TableRow(children: [
+                        const TableCell(
+                          child: Text(
+                            "Owner",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        TableCell(
+                          child: Text(
+                            widget.seller.name.toString(),
+                          ),
+                        )
+                      ]),
                     ],
                   ),
+                  const SizedBox(height: 16),
                 ],
+              ),
+            ),
+          ),
+          ElevatedButton(
+              onPressed: () {
+                barterdialog();
+              },
+              child: const Text("Barter Now!")),
+          Expanded(
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: Card(
+                child: SizedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      IconButton(
+                          iconSize: 32,
+                          onPressed: _makePhoneCall,
+                          icon: const Icon(Icons.call)),
+                      IconButton(
+                          iconSize: 32,
+                          onPressed: _makeSmS,
+                          icon: const Icon(Icons.message)),
+                      IconButton(
+                          iconSize: 32,
+                          onPressed: openwhatsapp,
+                          icon: const Icon(Icons.wechat_outlined)),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -201,10 +258,21 @@ class _BuyerDetailsScreenState extends State<BuyerDetailsScreen> {
     );
   }
 
-  void addtocartdialog() {
-    if (widget.user.id.toString() == widget.useritem.userId.toString()) {
+  void barterdialog() {
+    if (widget.user.id.toString() == "na") {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User cannot add own item")));
+          const SnackBar(content: Text("Please register to barter item")));
+      return;
+    }
+    if (widget.user.id.toString() == widget.useritem.userId.toString()) {
+      Fluttertoast.showToast(
+          msg: "User cannot barter their own item",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          fontSize: 16.0);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //     const SnackBar(content: Text("User cannot add own item")));
       return;
     }
     showDialog(
@@ -214,19 +282,26 @@ class _BuyerDetailsScreenState extends State<BuyerDetailsScreen> {
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10.0))),
           title: const Text(
-            "Add to cart?",
+            "Barter this item?",
             style: TextStyle(),
           ),
-          content: const Text("Are you sure?", style: TextStyle()),
+          content: const Text(
+              "Are you sure you want to continue? Please be aware that you may face charges.",
+              style: TextStyle()),
           actions: <Widget>[
             TextButton(
               child: const Text(
                 "Yes",
                 style: TextStyle(),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                addtocart();
+              onPressed: () async {
+                await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) => BillScreen(
+                              user: widget.user,
+                            )));
+                            Navigator.of(context).pop();
               },
             ),
             TextButton(
@@ -244,32 +319,44 @@ class _BuyerDetailsScreenState extends State<BuyerDetailsScreen> {
     );
   }
 
-//`cart_id`, `item_id`, `cart_qty`, `cart_price`, `user_id`, `buyer_id`, `cart_date`
-  void addtocart() {
-    http.post(Uri.parse("${MyConfig().SERVER}/barterlt/php/addtocart.php"),
-        body: {
-          "item_id": widget.useritem.itemId.toString(),
-          "cart_qty": userqty.toString(),
-          "cart_price": totalprice.toString(),
-          "userid": widget.user.id,
-          "sellerid": widget.useritem.userId
-        }).then((response) {
-      print(response.body);
-      if (response.statusCode == 200) {
-        var jsondata = jsonDecode(response.body);
-        if (jsondata['status'] == 'success') {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Success")));
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Failed")));
-        }
-        Navigator.pop(context);
+  Future<void> _makePhoneCall() async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: widget.seller.phone,
+    );
+    await launchUrl(launchUri);
+  }
+
+  Future<void> _makeSmS() async {
+    final Uri launchUri = Uri(
+      scheme: 'sms',
+      path: widget.seller.phone,
+    );
+    await launchUrl(launchUri);
+  }
+
+  openwhatsapp() async {
+    var whatsapp = widget.seller.phone;
+    var whatsappURlAndroid =
+        "whatsapp://send?phone=$whatsapp&text=Hi! I'd like to barter with you.";
+    var whatappURLIos =
+        "https://wa.me/$whatsapp?text=${Uri.parse("Hi! I'd like to barter with you.")}";
+    if (Platform.isIOS) {
+      // for iOS phone only
+      if (await canLaunch(whatappURLIos)) {
+        await launch(whatappURLIos, forceSafariVC: false);
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Failed")));
-        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Whatsapp not installed")));
       }
-    });
+    } else {
+      // android , web
+      if (await canLaunch(whatsappURlAndroid)) {
+        await launch(whatsappURlAndroid);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Whatsapp not installed")));
+      }
+    }
   }
 }

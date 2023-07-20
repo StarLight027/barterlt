@@ -1,14 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ndialog/ndialog.dart';
 import 'package:flutter/material.dart';
 import '../../models/item.dart';
 import 'package:barterlt/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:barterlt/myconfig.dart';
 
-import 'buyercartscreen.dart';
 import 'buyerdetailscreen.dart';
 
 //for buyer screen
@@ -29,14 +31,22 @@ class _BuyerTabScreenState extends State<BuyerTabScreen> {
   int numofpage = 1, curpage = 1;
   int numberofresult = 0;
   var color;
-  int cartqty = 0;
+
+  late User seller;
 
   TextEditingController searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
-    loadItems(1);
-    print("Buyer");
+    seller = User(
+        id: "0",
+        email: "unregistered",
+        name: "unregistered",
+        phone: "0123456789");
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      loadItems(1);
+    });
   }
 
   @override
@@ -63,48 +73,6 @@ class _BuyerTabScreenState extends State<BuyerTabScreen> {
                 showsearchDialog();
               },
               icon: const Icon(Icons.search)),
-          TextButton.icon(
-            icon: const Icon(
-              Icons.shopping_cart,
-            ), // Your icon here
-            label: Text(cartqty.toString()), // Your text here
-            onPressed: () {
-              if (cartqty > 0) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (content) => BuyerCartScreen(
-                              user: widget.user,
-                            )));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("No item in cart")));
-              }
-            },
-          )
-          // Stack(
-          //   alignment: Alignment.topRight,
-          //   children: [
-          //     IconButton(
-          //         onPressed: () {},
-          //         icon: const Icon(
-          //           Icons.shopping_cart,
-          //         )),
-          //     Positioned(
-          //         right: 30,
-          //         bottom: 25,
-          //         child: Text(
-          //           cartqty.toString(),
-          //           style: const TextStyle(color: Colors.red, fontSize: 18),
-          //         )),
-          //   ],
-          // )
-          // IconButton(
-          //     onPressed: () {},
-          //     icon: const Icon(
-          //       Icons.shopping_cart,
-          //     )),
-          // Text(cartqty.toString()),
         ],
       ),
       body: RefreshIndicator(
@@ -123,7 +91,7 @@ class _BuyerTabScreenState extends State<BuyerTabScreen> {
                       width: 300,
                       alignment: Alignment.center,
                       child: Text(
-                        "${itemList.length} Items Found",
+                        "$numberofresult Items Found",
                         style:
                             const TextStyle(color: Colors.white, fontSize: 18),
                       ),
@@ -178,15 +146,7 @@ class _BuyerTabScreenState extends State<BuyerTabScreen> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              Item useritem =
-                                  Item.fromJson(itemList[index].toJson());
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (content) => BuyerDetailsScreen(
-                                            user: widget.user,
-                                            useritem: useritem,
-                                          )));
+                              _showDetails(index);
                               loadItems(1);
                             },
                             child: Column(
@@ -303,6 +263,42 @@ class _BuyerTabScreenState extends State<BuyerTabScreen> {
     });
   }
 
+  _showDetails(int index) async {
+    if (widget.user.id == "0") {
+      Fluttertoast.showToast(
+          msg: "Please register an account",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          fontSize: 14.0);
+      return;
+    }
+    Item useritem = Item.fromJson(itemList[index].toJson());
+    loadSingleSeller(index);
+    //todo update seller object with empty object.
+    ProgressDialog progressDialog = ProgressDialog(
+      context,
+      blur: 5,
+      message: const Text("Loading..."),
+      title: null,
+    );
+    progressDialog.show();
+    Timer(const Duration(seconds: 1), () {
+      if (seller.id != "0") {
+        progressDialog.dismiss();
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (content) => BuyerDetailsScreen(
+                      user: widget.user,
+                      useritem: useritem,
+                      seller: seller,
+                    )));
+      }
+      progressDialog.dismiss();
+    });
+  }
+
   void showsearchDialog() {
     showDialog(
       context: context,
@@ -378,6 +374,16 @@ class _BuyerTabScreenState extends State<BuyerTabScreen> {
 
     setState(() {
       loadItems(1);
+    });
+  }
+
+  loadSingleSeller(int index) {
+    http.post(Uri.parse("${MyConfig().SERVER}/barterlt/php/load_seller.php"),
+        body: {"sellerid": itemList[index].userId}).then((response) {
+      var jsonResponse = json.decode(response.body);
+      if (response.statusCode == 200 && jsonResponse['status'] == "success") {
+        seller = User.fromJson(jsonResponse['data']);
+      }
     });
   }
 }

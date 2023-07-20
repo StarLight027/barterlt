@@ -4,7 +4,7 @@ import 'package:barterlt/views/screens/sellertabscreen.dart';
 
 import '../../models/user.dart';
 import 'buyertabscreen.dart';
-import 'chattabscreen.dart';
+import 'credittabscreen.dart';
 
 //for buyer screen
 
@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       SellerTabScreen(user: widget.user),
       ProfileTabScreen(user: widget.user),
-      ChatTabScreen(user: widget.user)
+      CreditTabScreen(user: widget.user)
     ];
   }
 
@@ -70,9 +70,9 @@ class _MainScreenState extends State<MainScreen> {
                 label: "Profile"),
             BottomNavigationBarItem(
                 icon: Icon(
-                  Icons.chat_rounded,
+                  Icons.credit_card_rounded,
                 ),
-                label: "Chat")
+                label: "Credit")
           ]),
     );
   }
@@ -90,7 +90,7 @@ class _MainScreenState extends State<MainScreen> {
         maintitle = "Profile";
       }
       if (_currentIndex == 3) {
-        maintitle = "Chat";
+        maintitle = "Credit";
       }
     });
   }
